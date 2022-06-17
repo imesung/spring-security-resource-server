@@ -24,14 +24,13 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
+
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.springframework.security:spring-security-oauth2-authorization-server:0.2.3")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server:2.5.4")
 
     runtimeOnly("com.h2database:h2")
     compileOnly("org.projectlombok:lombok")

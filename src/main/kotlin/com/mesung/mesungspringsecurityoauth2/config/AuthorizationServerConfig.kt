@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration
 import org.springframework.security.oauth2.core.AuthorizationGrantType
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod
+import org.springframework.security.oauth2.core.oidc.OidcScopes
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository
@@ -29,20 +30,6 @@ import java.util.*
 class AuthorizationServerConfig {
 
     @Bean
-    fun registeredClientRepository() : RegisteredClientRepository {
-        val registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-            .clientId("test")
-            .clientSecret("{noop}secret")
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-            .redirectUri("localhost:9000/authorized")
-            .build()
-
-        return InMemoryRegisteredClientRepository(registeredClient)
-    }
-
-    @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @Throws(
         Exception::class
@@ -50,6 +37,25 @@ class AuthorizationServerConfig {
     fun authServerSecurityFilterChain(http: HttpSecurity): SecurityFilterChain? {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http)
         return http.formLogin(Customizer.withDefaults()).build()
+    }
+
+    @Bean
+    fun registeredClientRepository() : RegisteredClientRepository {
+        val registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
+            .clientId("articles-client")
+            .clientSecret("{noop}secret")
+//            .clientSecret("{noop}secret")
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+            .redirectUri("http://127.0.0.1:8080/login/oauth2/code/articles-client-oidc")
+            .redirectUri("http://127.0.0.1:8080/authorized")
+            .scope(OidcScopes.OPENID)
+            .scope("articles.read")
+//            .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+            .build()
+
+        return InMemoryRegisteredClientRepository(registeredClient)
     }
 
     @Bean
@@ -69,10 +75,22 @@ class AuthorizationServerConfig {
             .build()
     }
 
+//    private fun generateRsaKey(): KeyPair {
+//        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
+//        keyPairGenerator.initialize(2048)
+//        return keyPairGenerator.generateKeyPair()
+//    }
+
     private fun generateRsaKey(): KeyPair {
-        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
-        keyPairGenerator.initialize(2048)
-        return keyPairGenerator.generateKeyPair()
+        val keyPair: KeyPair
+        keyPair = try {
+            val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
+            keyPairGenerator.initialize(2048)
+            keyPairGenerator.generateKeyPair()
+        } catch (ex: java.lang.Exception) {
+            throw IllegalStateException(ex)
+        }
+        return keyPair
     }
 
     @Bean

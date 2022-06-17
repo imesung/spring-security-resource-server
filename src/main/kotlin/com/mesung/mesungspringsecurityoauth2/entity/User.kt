@@ -14,7 +14,7 @@ class User {
     private val lastName: String? = null
     private val email: String? = null
 
-    @Column(length = 60)
+    @Column(length = 100)
     private val password: String? = null
     private val role: String? = null
     private val enabled = false
